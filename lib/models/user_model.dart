@@ -5,11 +5,7 @@ class UserModel {
   final String gender;
   final String birth;
   final String country;
-  final String occupation;
-  final String pursuit;
-  final int workHoursPerDay;
-  final int workDaysPerWeek;
-  final int monthlyBudget;
+  final String language;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -21,11 +17,7 @@ class UserModel {
     required this.gender,
     required this.birth,
     required this.country,
-    required this.occupation,
-    required this.pursuit,
-    required this.workHoursPerDay,
-    required this.workDaysPerWeek,
-    required this.monthlyBudget,
+    required this.language,
     required this.createdAt,
     required this.updatedAt,
   });

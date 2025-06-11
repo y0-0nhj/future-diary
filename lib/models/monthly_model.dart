@@ -2,7 +2,7 @@ class MonthlyModel {
   final String id;
   final String userId;
   final String month;
-  final String goalText;
+  final Map<String, dynamic> goalText;
   final String relatedFutureDiaryId;
   final DateTime createdAt;
   final DateTime updatedAt;

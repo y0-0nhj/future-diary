@@ -10,6 +10,7 @@ class DailyModel {
   final String generatedByAI;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String color;
 
   DailyModel({
     required this.id,
@@ -23,5 +24,6 @@ class DailyModel {
     required this.generatedByAI,
     required this.createdAt,
     required this.updatedAt,
+    required this.color,
   });
 } 
