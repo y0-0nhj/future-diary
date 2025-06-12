@@ -1,307 +1,437 @@
 import 'package:flutter/material.dart';
 
 class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({super.key});
+
   @override
-  _OnboardingScreenState createState() => _OnboardingScreenState();
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _pageController = PageController();
+  
   int _currentPage = 0;
 
-  // ... (다른 컨트롤러 변수들은 그대로) ...
-  final _fullNameController = TextEditingController();
-  final _birthController = TextEditingController();
-  String _selectedGender = '남성';
-  final _countryController = TextEditingController();
-  final _occupationController = TextEditingController();
-  final _pursuitController = TextEditingController();
-  int _workHoursPerDay = 8;
-  int _workDaysPerWeek = 5;
-  int _monthlyBudget = 1000000;
+  // 입력값 상태
+  String occupation = '';
+  int workHours = 5;
+  List<bool> workDays = List.filled(7, false); // 월~일
+  String budget = '';
+  String projectTitle = '';
+  String projectDetail = '';
+  String diaryTitle = '';
+  String diaryContent = '';
+
+  // 상태 변수 추가
+  String? selectedCategory;
+  String detailInput = '';
+
+  // 폰트, 색상, 스타일
+  final Color olive = const Color(0xFF778557);
+  // 요일 텍스트
+  final List<String> weekDays = ['월', '화', '수', '목', '금', '토', '일'];
 
   @override
   Widget build(BuildContext context) {
-    // 1. Scaffold를 PopScope로 감싸줍니다.
-    return PopScope(
-      canPop: false, // 이 화면 자체는 뒤로가기로 바로 닫히지 않습니다.
-      onPopInvoked: (didPop) {
-        if (didPop) return;
-
-        // 2. 현재 페이지가 첫 페이지(0)보다 뒤에 있다면,
-        if ((_pageController.page?.round() ?? 0) > 0) {
-          // PageView의 이전 페이지로 이동시킵니다.
-          _pageController.previousPage(
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        } else {
-          // 3. 현재 페이지가 첫 페이지라면, 아무것도 하지 않습니다.
-          // 이 경우, 이벤트가 상위(main.dart)의 PopScope로 전달되어
-          // "앱 종료" 다이얼로그가 뜨게 됩니다.
-        }
-      },
-      child: Scaffold(
-        body: PageView(
-          controller: _pageController,
-          onPageChanged: (index) {
-            setState(() {
-              _currentPage = index;
-            });
-          },
-          // 원인이었던 physics는 그대로 둡니다. 이제 PopScope가 제어하니까요.
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            _buildBasicInfoPage(),
-            _buildWorkInfoPage(),
-            _buildBudgetPage(),
-          ],
-        ),
-        // ... (bottomNavigationBar는 수정할 필요 없음) ...
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (_currentPage > 0)
-                ElevatedButton(
-                  onPressed: () {
-                    _pageController.previousPage(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: Text('이전'),
-                ),
-              Spacer(), // 버튼을 양 끝으로 보내기 위해 추가하면 좋습니다.
-              ElevatedButton(
-                onPressed: () {
-                  if (_currentPage < 2) {
-                    _pageController.nextPage(
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  } else {
-                    _submitForm();
-                  }
-                },
-                child: Text(_currentPage == 2 ? '완료' : '다음'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // _buildBasicInfoPage, _buildWorkInfoPage, _buildBudgetPage, _submitForm, dispose 메서드는
-  // 수정할 필요 없이 그대로 두시면 됩니다.
-  Widget _buildBasicInfoPage() {
-    // ... 기존 코드 ...
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(),
-            Text(
-              '기본 정보',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            SizedBox(height: 24),
-            TextFormField(
-              controller: _fullNameController,
-              decoration: InputDecoration(
-                labelText: '이름',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '이름을 입력해주세요';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 16),
-            TextFormField(
-              controller: _birthController,
-              decoration: InputDecoration(
-                labelText: '생년월일',
-                border: OutlineInputBorder(),
-                hintText: 'YYYY-MM-DD',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '생년월일을 입력해주세요';
-                }
-                return null;
-              },
-            ),
-            SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _selectedGender,
-              decoration: InputDecoration(
-                labelText: '성별',
-                border: OutlineInputBorder(),
-              ),
-              items: ['남성', '여성', '기타'].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedGender = newValue!;
-                });
-              },
-            ),
-            SizedBox(height: 16),
-            TextFormField(
-              controller: _countryController,
-              decoration: InputDecoration(
-                labelText: '국가',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '국가를 입력해주세요';
-                }
-                return null;
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWorkInfoPage() {
-    // ... 기존 코드 ...
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
         children: [
-          Text(
-            '직업 정보',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          SizedBox(height: 24),
-          TextFormField(
-            controller: _occupationController,
-            decoration: InputDecoration(
-              labelText: '직업',
-              border: OutlineInputBorder(),
+          Positioned.fill(
+            child: Image.asset(
+              'assets/backgrounds/background1.png',
+              fit: BoxFit.cover,
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '직업을 입력해주세요';
-              }
-              return null;
-            },
           ),
-          SizedBox(height: 16),
-          TextFormField(
-            controller: _pursuitController,
-            decoration: InputDecoration(
-              labelText: '추구하는 목표',
-              border: OutlineInputBorder(),
+          SafeArea(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+              child: _buildPage(_currentPage),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '목표를 입력해주세요';
-              }
-              return null;
-            },
-          ),
-          SizedBox(height: 16),
-          Text('일일 근무 시간'),
-          Slider(
-            value: _workHoursPerDay.toDouble(),
-            min: 1,
-            max: 24,
-            divisions: 23,
-            label: '$_workHoursPerDay시간',
-            onChanged: (double value) {
-              setState(() {
-                _workHoursPerDay = value.round();
-              });
-            },
-          ),
-          SizedBox(height: 16),
-          Text('주간 근무 일수'),
-          Slider(
-            value: _workDaysPerWeek.toDouble(),
-            min: 1,
-            max: 7,
-            divisions: 6,
-            label: '$_workDaysPerWeek일',
-            onChanged: (double value) {
-              setState(() {
-                _workDaysPerWeek = value.round();
-              });
-            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBudgetPage() {
-    // ... 기존 코드 ...
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '예산 정보',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          SizedBox(height: 24),
-          Text('월 예산'),
-          Slider(
-            value: _monthlyBudget.toDouble(),
-            min: 0,
-            max: 10000000,
-            divisions: 100,
-            label: '${_monthlyBudget.toStringAsFixed(0)}원',
-            onChanged: (double value) {
-              setState(() {
-                _monthlyBudget = value.round();
-              });
-            },
-          ),
-          Text(
-            '${_monthlyBudget.toStringAsFixed(0)}원',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _submitForm() {
-    // ... 기존 코드 ...
-    if (_formKey.currentState!.validate()) {
-      // TODO: 온보딩 정보 저장 및 다음 화면으로 이동
-      print('온보딩 정보 제출');
+  Widget _buildPage(int idx) {
+    switch (idx) {
+      case 0: return _buildQ1();
+      case 1: return _buildQ2();
+      case 2: return _buildQ3();
+      case 3: return _buildQ4();
+      case 4: return _buildQ5();
+      case 5: return _buildQ6();
+      default: return Container();
     }
   }
 
-  @override
-  void dispose() {
-    // ... 기존 코드 ...
-    _pageController.dispose();
-    _fullNameController.dispose();
-    _birthController.dispose();
-    _countryController.dispose();
-    _occupationController.dispose();
-    _pursuitController.dispose();
-    super.dispose();
+  // Q1: 직업
+  Widget _buildQ1() {
+    // 1단계 카테고리 목록
+    final categories = [
+      '학생',
+      '직장인',
+      '취업 준비생',
+      '프리랜서 / 사업가',
+      '기타',
+    ];
+
+    // 2단계 질문 맵
+    final detailQuestions = {
+      '학생': '어떤 분야를 전공하고 계신가요?',
+      '직장인': '어떤 직무를 맡고 계신가요? (예: 개발자, 기획자)',
+      '취업 준비생': '어떤 분야로 취업을 준비 중이신가요?',
+      '프리랜서 / 사업가': '어떤 업종/분야에서 활동 중이신가요?',
+      '기타': '현재 상황을 간단히 적어주세요.',
+    };
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 60),
+          Text('Q1', style: TextStyle(fontSize: 60)),
+          Text('현재 상황을 가장 잘 나타내는 것을 선택해주세요.', style: TextStyle(fontSize: 30)),
+          const SizedBox(height: 10),
+          // 2단계: 선택에 따라 주관식 입력
+          if (selectedCategory != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              detailQuestions[selectedCategory]!,
+              style: TextStyle(fontSize: 20, color: Colors.grey[700]),
+            ),
+            TextField(
+              maxLength: 20,
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                hintText: '입력',
+                counterText: '',
+              ),
+              style: TextStyle(fontSize: 20),
+              onChanged: (v) => setState(() => detailInput = v),
+            ),
+            const SizedBox(height: 30),
+          ],
+          // 1단계: 객관식 라디오 버튼
+          ...categories.map((cat) => RadioListTile<String>(
+                value: cat,
+                groupValue: selectedCategory,
+                title: Text(cat, style: TextStyle(fontSize: 22)),
+                activeColor: olive,
+                contentPadding: EdgeInsets.zero,
+                dense: true,
+                visualDensity: VisualDensity.compact,
+                onChanged: (v) => setState(() {
+                  selectedCategory = v;
+                  detailInput = '';
+                }),
+              )),
+          const Spacer(),
+          Center(
+            child: _buildButton(
+              '확인',
+              (selectedCategory != null && detailInput.trim().isNotEmpty)
+                  ? () {
+                      _nextPage();
+                    }
+                  : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Q2: 하루 작업 시간
+  Widget _buildQ2() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBackArrow(),
+          const SizedBox(height: 8),
+          Text('Q2', style: TextStyle(fontSize: 60)),
+          Text('하루동안 작업할 수 있는 시간은 얼마나 되나요?', style: TextStyle(fontSize: 30)),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Text('약', style: TextStyle(fontSize: 24,color: Colors.grey[700])),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Slider(
+                  value: workHours.toDouble(),
+                  min: 1,
+                  max: 24,
+                  divisions: 23,
+                  label: '$workHours',
+                  onChanged: (v) => setState(() => workHours = v.round()),
+                  activeColor: olive,
+                  inactiveColor: olive.withOpacity(0.3),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text('${workHours}시간', style: TextStyle(fontSize: 24,  color: Colors.grey[700])),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _buildSummaryLine('직업', occupation),
+          const Spacer(),
+          Center(
+            child: _buildButton('확인', _nextPage),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+
+  // Q3: 작업 가능 요일
+  Widget _buildQ3() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBackArrow(),
+          const SizedBox(height: 8),
+          Text('Q3', style: TextStyle(fontSize: 60)),
+          const SizedBox(height: 10),
+          Text('일주일동안 작업할 수 있는 요일을 모두 선택해주세요.', style: TextStyle(fontSize: 22)),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: List.generate(7, (i) {
+              final selected = workDays[i];
+              return GestureDetector(
+                onTap: () => setState(() => workDays[i] = !workDays[i]),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: selected ? olive : Colors.grey[300],
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    weekDays[i],
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: selected ? Colors.white : Colors.grey[700],
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 10),
+          _buildSummaryLine('작업가능시간', '약 $workHours 시간'),
+          _buildSummaryLine('직업', occupation),
+          const Spacer(),
+          Center(
+            child: _buildButton('확인', _nextPage),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+
+  // Q4: 예산
+  Widget _buildQ4() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBackArrow(),
+          const SizedBox(height: 8),
+          Text('Q4', style: TextStyle(fontSize: 60)),
+          const SizedBox(height: 10),
+          Text('월에 투자할 수 있는 예산은 얼마인가요?', style: TextStyle(fontSize: 30)),
+          const SizedBox(height: 10),
+          TextField(
+            style: TextStyle(fontSize: 24),
+            decoration: const InputDecoration(
+              hintText: '선택',
+              border: UnderlineInputBorder(),
+            ),
+            onChanged: (v) => setState(() => budget = v),
+          ),
+          const SizedBox(height: 10),
+          _buildSummaryLine('작업가능요일', _selectedDaysText()),
+          _buildSummaryLine('작업가능시간', '약 $workHours 시간'),
+          _buildSummaryLine('직업', occupation),
+          const Spacer(),
+          Center(
+            child: _buildButton('완료', _nextPage),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+
+  // Q5: 가용 예산 + 요약
+  Widget _buildQ5() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBackArrow(),
+          const SizedBox(height: 8),
+          Center(
+            child: Image.asset('assets/images/teapot.png', height: 120),
+          ),
+          const SizedBox(height: 16),
+          _buildSummaryLine('가용 예산', budget),
+          _buildSummaryLine('작업가능요일', _selectedDaysText()),
+          _buildSummaryLine('작업가능시간', '약 $workHours 시간'),
+          _buildSummaryLine('직업', occupation),
+          const Spacer(),
+          Center(
+            child: _buildButton('완료', _nextPage),
+          ),
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+
+  // Q6: 관심사 및 과업
+  Widget _buildQ6() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBackArrow(),
+          const SizedBox(height: 8),
+          Center(
+            child: Image.asset('assets/images/laptop.png', height: 100),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            '관심사 및 진행 중인 과업,\n앞으로 해야할 것들을 적어주세요.',
+            style: TextStyle(fontSize: 22, color: Colors.grey[700]),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          _buildProjectInput(),
+          const Spacer(),
+          Center(
+            child: _buildButton('완료', () {
+              // TODO: 제출 처리
+            }),
+          ),
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+
+  // --- 공통 위젯들 ---
+
+  Widget _buildBackArrow() {
+    return IconButton(
+      icon: Image.asset('assets/icons/arrow_left1.png', width: 50, height: 50),
+      onPressed: _prevPage,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(),
+    );
+  }
+
+  Widget _buildButton(String text, VoidCallback? onTap) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: olive,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+          ),
+          elevation: 0,
+        ),
+        onPressed: onTap,
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 22, color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryLine(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Text(label, style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+          const SizedBox(width: 12),
+          Text(value, style: TextStyle(fontSize: 30, color: Colors.grey[600])),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProjectInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('제목', style: TextStyle(fontSize: 16)),
+        TextField(
+          style: TextStyle(fontSize: 20),
+          decoration: const InputDecoration(
+            border: UnderlineInputBorder(),
+          ),
+          onChanged: (v) => setState(() => projectTitle = v),
+        ),
+        const SizedBox(height: 16),
+        Text('세부 내용', style: TextStyle(fontSize: 16)),
+        TextField(
+          style: TextStyle(fontSize: 18),
+          maxLines: 5,
+          maxLength: 1000,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            counterText: '',
+          ),
+          onChanged: (v) => setState(() => projectDetail = v),
+        ),
+      ],
+    );
+  }
+
+  // --- 페이지 이동 ---
+  void _nextPage() {
+    if (_currentPage < 5) {
+      setState(() {
+        _currentPage++;
+      });
+    }
+  }
+
+  void _prevPage() {
+    if (_currentPage > 0) {
+      setState(() {
+        _currentPage--;
+      });
+    }
+  }
+
+  String _selectedDaysText() {
+    final selected = <String>[];
+    for (int i = 0; i < 7; i++) {
+      if (workDays[i]) selected.add(weekDays[i]);
+    }
+    return selected.join(', ');
   }
 }

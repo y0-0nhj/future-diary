@@ -16,7 +16,7 @@ class ResponsivePageLayout extends StatelessWidget {
   // 넓은 화면으로 간주할 기준 너비 (dp)
   static const double wideScreenBreakpoint = 450.0;
   // 넓은 화면에서 콘텐츠 카드가 가질 최대 너비 (dp)
-  static const double maxContentWidth = 400.0;
+  static const double maxContentWidth = 360.0;
 
   @override
   Widget build(BuildContext context) {

@@ -20,7 +20,8 @@ class MyApp extends StatelessWidget {
       title: 'Future Diary',
       theme: ThemeData(
         fontFamily: 'OnePrettyNight',
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF778557)),
+        scaffoldBackgroundColor: Colors.transparent,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         useMaterial3: true,
       ),
@@ -40,23 +41,6 @@ class MyApp extends StatelessWidget {
               if (router.canPop()) {
                 router.pop();
               } else {
-                showDialog(
-                  context: rootNavigatorKey.currentContext!,
-                  builder: (context) => AlertDialog(
-                    title: const Text('👋 앱 종료'),
-                    content: const Text('정말로 미래일기를 종료하시겠어요?'),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('아니요'),
-                      ),
-                      TextButton(
-                        onPressed: () => SystemNavigator.pop(),
-                        child: const Text('예'),
-                      ),
-                    ],
-                  ),
-                );
                 print("======== 뒤로가기 감지! 팝업을 띄워야 함! ========");
               }
             },
@@ -73,7 +57,17 @@ class MyApp extends StatelessWidget {
                 child: SafeArea(
                   top: true,
                   bottom: true,
-                  child: child ?? const SizedBox.shrink(),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                    layoutBuilder: (currentChild, previousChildren) {
+                      return currentChild ?? const SizedBox.shrink();
+                    },
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 ),
               ),
             ),

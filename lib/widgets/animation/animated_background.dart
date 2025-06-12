@@ -95,24 +95,24 @@ class _BackgroundPainter extends CustomPainter {
 
     // 파스텔톤 색상
     
-    final color1 = const Color.fromARGB(255, 255, 230, 0).withOpacity(0.05); // 하늘색
-    final color2 = const Color.fromARGB(248, 0, 153, 255).withOpacity(0.05); // 분홍색
-    final color3 = const Color.fromARGB(255, 102, 255, 0).withOpacity(0.05); // 노란색
-    final color4 = const Color.fromARGB(255, 242, 101, 255).withOpacity(0.05); // 보라색
+    final color1 = const Color.fromARGB(248, 255, 217, 0).withOpacity(0.06); // 하늘색
+    final color3 = const Color.fromARGB(248, 255, 251, 0).withOpacity(0.06); // 분홍색
+    final color2 = const Color.fromARGB(248, 255, 217, 0).withOpacity(0.06); // 노란색
+    final color4 = const Color.fromARGB(248, 255, 251, 0).withOpacity(0.06); // 보라색
 
 
     // 원 그리기
     paint.color = color1;
-    canvas.drawCircle(path1, size.width * 0.27, paint);
+    canvas.drawCircle(path1, size.width * 0.25, paint);
     paint.color = color2;
-    canvas.drawCircle(path2, size.width * 0.30, paint);
+    canvas.drawCircle(path2, size.width * 0.25, paint);
     paint.color = color3;
-    canvas.drawCircle(path3, size.width * 0.26, paint);
+    canvas.drawCircle(path3, size.width * 0.25, paint);
     paint.color = color4;
-    canvas.drawCircle(path4, size.width * 0.26, paint);
+    canvas.drawCircle(path4, size.width * 0.25, paint);
 
     // 별(점) 그리기
-    final starPaint = Paint()..color = const Color.fromARGB(255, 110, 121, 72).withOpacity(0.5);
+    final starPaint = Paint()..color = const Color.fromARGB(255, 120, 131, 81).withOpacity(0.5);
     for (final star in stars) {
       // 미세한 움직임: sin/cos, twinkle, progress, speed 활용
       final dx = star.x * size.width + 8 * sin(progress * 2 * pi * star.speed + star.twinkle);
