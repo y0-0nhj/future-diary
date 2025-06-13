@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:future_diary/widgets/common/common_modal.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
+import 'package:intl/intl.dart';
+
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -28,6 +31,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   String projectDetail = '';
   String diaryTitle = '';
   String diaryContent = '';
+  String _selectedDate = '';
+  String _dateCount = '';
+  String _range = '';
+  String _rangeCount = '';
 
   // 상태 변수 추가
   String? selectedCategory;
@@ -568,82 +575,11 @@ Widget _buildQ6() {
 
 // _buildProjectInput이 컨트롤러를 직접 사용하도록 수정
 Widget _buildProjectInput() {
-
-  /*
   return Stack(
-    clipBehavior: Clip.none, // Stack 밖으로 나가는 + 버튼을 보이게 함
+    clipBehavior: Clip.none,
     children: [
-      // 1. 테두리가 있는 메인 카드
       Container(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0, top:0 , bottom: 0),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade400),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 기간 표시 영역
-            Row(
-              children: [
-                Text(
-                  (startDate == null || endDate == null)
-                      ? '기간 없음'
-                      : '${startDate!.toString().split(' ')[0]} ~ ${endDate!.toString().split(' ')[0]}',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(Icons.calendar_today, color: Colors.grey[600]),
-                  onPressed: () {
-                    // TODO: Date Range Picker 구현
-                  },
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
-
-/*
-      const Text('제목', style: TextStyle(fontSize: 16)),
-      TextField(
-        controller: _projectTitleController, // 컨트롤러 연결
-        style: const TextStyle(fontSize: 20),
-        decoration: const InputDecoration(
-          hintText: '예: 주식 트레이딩 공부',
-          border: UnderlineInputBorder(),
-        ),
-        onChanged: (v) => setState(() {}), // 버튼 상태 갱신
-      ),
-      const SizedBox(height: 10),
-      const Text('세부 내용', style: TextStyle(fontSize: 16)),
-      TextField(
-        controller: _projectDetailController, // 컨트롤러 연결
-        style: const TextStyle(fontSize: 18),
-        maxLines: 5,
-        maxLength: 1000,
-        decoration: const InputDecoration(
-          hintText: '관심 종목 현황 파악, 관련 뉴스 보기 등',
-          border: OutlineInputBorder(),
-          counterText: '',
-        ),
-
-        onChanged: (v) => setState(() {}), // 버튼 상태 갱신
-        
-      ),
-      */
-    ],
-  );
-*/
-
-
-  return Stack(
-    clipBehavior: Clip.none, // Stack 밖으로 나가는 + 버튼을 보이게 함
-    children: [
-      // 1. 테두리가 있는 메인 카드
-      Container(
-        padding: const EdgeInsets.only(left: 20, right: 20, top:5, bottom: 0),
+        padding: const EdgeInsets.only(left: 20, right: 20, top: 5, bottom: 0),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade400),
           borderRadius: BorderRadius.circular(8.0),
@@ -659,15 +595,98 @@ Widget _buildProjectInput() {
                 Text(
                   (startDate == null || endDate == null)
                       ? '기간 없음'
-                      : '${startDate!.toString().split(' ')[0]} ~ ${endDate!.toString().split(' ')[0]}',
-                  style: TextStyle(fontSize: 20, color: Colors.grey[600]),
+                      : '${_formatDate(startDate!)} ~ ${_formatDate(endDate!)}',
+                  style: TextStyle(color: Colors.grey[600]),
                 ),
                 const Spacer(),
                 IconButton(
                   icon: Icon(Icons.calendar_today, color: Colors.grey[600]),
                   iconSize: 25,
                   onPressed: () {
-                    // TODO: Date Range Picker 구현
+                    showCommonModal(
+                      context: context,
+                      child: Container(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              '기간 선택',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              height: 300,
+                              child: Theme(
+                                data: Theme.of(context).copyWith(
+                                  colorScheme: ColorScheme.light(
+                                    primary: olive,
+                                    onPrimary: Colors.white,
+                                    surface: Colors.white,
+                                    onSurface: Colors.black,
+                                  ),
+                                ),
+                                child: SfDateRangePicker(
+                                  headerStyle: DateRangePickerHeaderStyle(
+                                    backgroundColor: Colors.transparent,
+                                    textStyle: TextStyle(
+                                      fontSize: 25,
+                                    ),
+                                  ),
+                                  monthFormat: 'MM월',
+                                  view: DateRangePickerView.month,
+                                  backgroundColor: Colors.transparent,
+                                  onSelectionChanged: _onSelectionChanged,
+                                  selectionMode: DateRangePickerSelectionMode.range,
+                                  selectionColor: olive,
+                                  startRangeSelectionColor: olive,
+                                  endRangeSelectionColor: olive,
+                                  rangeTextStyle: TextStyle(color: Colors.white),
+                                  minDate: DateTime.now().subtract(const Duration(days: 365*5)),
+                                  maxDate: DateTime.now().add(const Duration(days: 365*5)),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text(
+                                    '취소',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: olive,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    '확인',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
                   },
                 )
               ],
@@ -738,7 +757,27 @@ Widget _buildProjectInput() {
   );
 }
 
+  /// called whenever a selection changed on the date picker widget.
+  void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
+    setState(() {
+      if (args.value is PickerDateRange) {
+        _range =
+            '${DateFormat('dd/MM/yyyy').format(args.value.startDate)} -'
+            // ignore: lines_longer_than_80_chars
+            ' ${DateFormat('dd/MM/yyyy').format(args.value.endDate ?? args.value.startDate)}';
+      } else if (args.value is DateTime) {
+        _selectedDate = args.value.toString();
+      } else if (args.value is List<DateTime>) {
+        _dateCount = args.value.length.toString();
+      } else {
+        _rangeCount = args.value.length.toString();
+      }
+    });
+  }
 
+String _formatDate(DateTime date) {
+  return '${date.year}년 ${date.month}월 ${date.day}일';
+}
 
   // --- 페이지 이동 ---
   void _nextPage() {

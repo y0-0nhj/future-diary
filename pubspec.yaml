@@ -17,6 +17,7 @@ dependencies:
   extension_google_sign_in_as_googleapis_auth: ^2.0.13
   flutter_svg: ^2.0.7
   numberpicker: ^2.1.2
+  syncfusion_flutter_datepicker: ^29.2.10
 
 dev_dependencies:
   flutter_test:
