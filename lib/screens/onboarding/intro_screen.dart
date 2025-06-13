@@ -13,7 +13,7 @@ class IntroScreen extends StatefulWidget {
 }
 
 class _IntroScreenState extends State<IntroScreen> with TickerProviderStateMixin {
-  bool showCat = false;
+  int currentScreen = 0;
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
 
@@ -113,9 +113,9 @@ class _IntroScreenState extends State<IntroScreen> with TickerProviderStateMixin
   }
 
   // 2. 두 번째(고양이) 화면의 콘텐츠 위젯
-  Widget _buildCatContent() {
+  Widget _buildCatContent1() {
     return LayoutBuilder(
-      key: const ValueKey('catContent'),
+      key: const ValueKey('catContent1'),
       builder: (context, constraints) {
         // constraints.maxWidth, constraints.maxHeight를 활용해 비율 조정 가능
         return Stack(
@@ -188,64 +188,93 @@ class _IntroScreenState extends State<IntroScreen> with TickerProviderStateMixin
     );
   }
 
-  // 3. '시작하기' 버튼 위젯
-  Widget _buildStartButton() {
-    return Padding(
-      key: const ValueKey('startButton'), // AnimatedSwitcher를 위한 Key
-      padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 32.0),
-      child: SizedBox(
-        width: double.infinity,
-        height: 56,
-        child: ElevatedButton(
-          onPressed: () => setState(() => showCat = true),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF778557),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(32),
-            ),
-          ),
-          child: const Text(
-            '시작하기',
-            style: TextStyle(
-                fontSize: 30, color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // 4. '예/아니오' 버튼 위젯
-  Widget _buildYesNoButtons() {
-    return Padding(
-      key: const ValueKey('yesNoButtons'), // AnimatedSwitcher를 위한 Key
-      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 32.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () { /* 아니오오 버튼 동작 */ },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFBFC3C7),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-                padding: const EdgeInsets.symmetric(vertical: 14)
+  // 3. 세 번째(고양이) 화면의 콘텐츠 위젯
+  Widget _buildCatContent2() {
+    return LayoutBuilder(
+      key: const ValueKey('catContent2'),
+      builder: (context, constraints) {
+        // constraints.maxWidth, constraints.maxHeight를 활용해 비율 조정 가능
+        return Stack(
+          children: [
+            // 말풍선
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                AnimatedBuilder(
+                  animation: _scaleAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _scaleAnimation.value,
+                      child: child,
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 0, right: 0, top: 0, bottom: 200),
+                    child: Align(
+                    alignment: Alignment.center,
+                    child: Image.asset(
+                      'assets/illustrations/intro/talk1.png',
+                      width: constraints.maxWidth * 0.9, // 화면 너비의 90%
+                      height: constraints.maxHeight * 0.9, // 화면 높이의 90%
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
+                ),
+                ),
+                // 문구
+                AnimatedBuilder(
+                  animation: _scaleAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: _scaleAnimation.value,
+                      child: child,
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 0, right: 0, top: 0, bottom: 230),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        '시작하기 전,\n당신의 멋진 미래를 그리기 위해\n잠시 몇 가지만 여쭤볼게요. ',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                      fontSize: 25, // 필요시 constraints.maxWidth에 따라 동적으로 조정 가능
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
-              child: const Text('아니오', style: TextStyle(fontSize: 22, color: Colors.white)),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () { context.push('/onboarding'); },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF778557),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-                padding: const EdgeInsets.symmetric(vertical: 14)
+            // 램프
+            Padding(
+              padding: const EdgeInsets.only(left: 150, right: 0, top: 175, bottom: 0),
+              child: Align(
+                alignment: Alignment.center,
+                child: Image.asset(
+                  'assets/illustrations/intro/lamp.png',
+                  width: constraints.maxWidth * 0.55, // 화면 너비의 80%
+                  fit: BoxFit.contain,
+                ),
               ),
-              child: const Text('예', style: TextStyle(fontSize: 22, color: Colors.white)),
             ),
-          ),
-        ],
-      ),
+                              // 고양이+책
+            Padding(
+              padding: const EdgeInsets.only(left: 0, right: 0, top: 120, bottom: 0),
+              child: Align(
+                alignment: Alignment.center,
+                child: Image.asset(
+                      'assets/illustrations/intro/showcat2.png',
+                      width: constraints.maxWidth * 0.7, // 화면 너비의 80%
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -256,12 +285,12 @@ class _IntroScreenState extends State<IntroScreen> with TickerProviderStateMixin
       onPopInvoked: (didPop) {
         if (didPop) return;
 
-        if (showCat) {
+        if (currentScreen > 0) {
           // 고양이 화면이면 소개 화면으로 전환
           setState(() {
-            showCat = false;
+            currentScreen--;
           });
-        } else {
+        } else{
           // 소개 화면이면 앱 종료 다이얼로그 표시
           showCommonModal(
             context: context,
@@ -293,7 +322,7 @@ class _IntroScreenState extends State<IntroScreen> with TickerProviderStateMixin
                       ),
                     ),
                     child: const Text(
-                      '예',
+                      '종료료',
                       style: TextStyle(fontSize: 22, color: Colors.white),
                     ),
                   ),),
@@ -310,7 +339,7 @@ class _IntroScreenState extends State<IntroScreen> with TickerProviderStateMixin
                       ),
                     ),
                     child: const Text(
-                      '아니오',
+                      '취소',
                       style: TextStyle(fontSize: 22, color: Colors.white),
                     ),
                   ),
@@ -333,25 +362,152 @@ class _IntroScreenState extends State<IntroScreen> with TickerProviderStateMixin
                     height: 450,
                     alignment: Alignment.center,
                     child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 500),
-                      transitionBuilder: (child, animation) {
-                        return FadeTransition(opacity: animation, child: child);
-                      },
-                      child: showCat ? _buildCatContent() : _buildIntroContent(),
-                    ),
-                  ),
-                  AnimatedSwitcher(
                     duration: const Duration(milliseconds: 500),
-                    transitionBuilder: (child, animation) {
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-                    child: showCat ? _buildYesNoButtons() : _buildStartButton(),
+                    transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                    child: _buildCurrentScreen(),
+                  ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 32,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 500),
+                      transitionBuilder: (child, animation) => FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
+                      child: _buildCurrentButton(),
+                    ),
                   ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+// 현재 화면에 맞는 콘텐츠 반환
+  Widget _buildCurrentScreen() {
+    switch (currentScreen) {
+      case 0:
+        return _buildIntroContent();
+      case 1:
+        return _buildCatContent1();
+      case 2:
+        return _buildCatContent2();
+      default:
+        return _buildIntroContent();
+    }
+  }
+
+  // 현재 화면에 맞는 버튼 반환
+  Widget _buildCurrentButton() {
+    switch (currentScreen) {
+      case 0:
+        return _buildStartButton();
+      case 1:
+        return _buildYesNoButtons();
+      case 2:
+        return _buildConfirmButton();
+      default:
+        return _buildStartButton();
+    }
+  }
+
+  
+  // 3. '시작하기' 버튼 위젯
+  Widget _buildStartButton() {
+    return Padding(
+      key: const ValueKey('startButton'), // AnimatedSwitcher를 위한 Key
+      padding: const EdgeInsets.symmetric(horizontal: 60.0, vertical: 32.0),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton(
+          onPressed: () => setState(() {
+            if (currentScreen == 0) {
+              currentScreen = 1;
+            }
+          }),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF778557),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(32),
+            ),
+          ),
+          child: const Text(
+            '시작하기',
+            style: TextStyle(
+                fontSize: 30, color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 4. '예/아니오' 버튼 위젯
+  Widget _buildYesNoButtons() {
+    return Padding(
+      key: const ValueKey('yesNoButtons'), // AnimatedSwitcher를 위한 Key
+      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 32.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () { /* 아니오오 버튼 동작 */ },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFBFC3C7),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                padding: const EdgeInsets.symmetric(vertical: 10)
+              ),
+              child: const Text('아니오', style: TextStyle(fontSize: 30, color: Colors.white)),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () { setState(() => currentScreen = 2); },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF778557),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                padding: const EdgeInsets.symmetric(vertical: 10)
+              ),
+              child: const Text('예', style: TextStyle(fontSize: 30, color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 5. 확인 버튼 위젯
+  Widget _buildConfirmButton() {
+    return Padding(
+      key: const ValueKey('confirmButton'), // AnimatedSwitcher를 위한 Key
+      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 32.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () { /* 확인 버튼 동작 */
+                setState(() {
+                  if (currentScreen == 2) {
+                    context.push('/onboarding');
+                  }
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF778557),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                padding: const EdgeInsets.symmetric(vertical: 10)
+              ),
+              child: const Text('확인', style: TextStyle(fontSize: 30, color: Colors.white)),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:future_diary/widgets/common/common_modal.dart';
+import 'package:numberpicker/numberpicker.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -173,11 +175,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 Widget _buildQ2() {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 32),
-    // 1. 화면 전체를 두 영역(콘텐츠, 버튼)으로 나눌 메인 Column
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 2. 스크롤이 필요한 모든 콘텐츠를 담을 부분
         Expanded(
           child: SingleChildScrollView(
             child: Column(
@@ -187,36 +187,44 @@ Widget _buildQ2() {
                 const SizedBox(height: 8),
                 const Text('Q2', style: TextStyle(fontSize: 60)),
                 const Text('하루동안 작업할 수 있는 시간은 얼마나 되나요?', style: TextStyle(fontSize: 30)),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Text('약', style: TextStyle(fontSize: 24, color: Colors.grey[700])),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Slider(
-                        value: workHours.toDouble(),
-                        min: 1,
-                        max: 24,
-                        divisions: 23,
-                        label: '$workHours',
-                        onChanged: (v) => setState(() => workHours = v.round()),
-                        activeColor: olive,
-                        inactiveColor: olive.withOpacity(0.3),
-                      ),
+                // NumberPicker 추가
+                Center(
+                  child: NumberPicker(
+                    value: workHours,
+                    minValue: 1,
+                    maxValue: 18,
+                    zeroPad: true,
+                    infiniteLoop: true,
+                    itemWidth: 2000,
+                    textStyle: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
                     ),
-                    const SizedBox(width: 8),
-                    Text('${workHours}시간', style: TextStyle(fontSize: 24, color: Colors.grey[700])),
-                  ],
+                    selectedTextStyle: const TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF778557),
+                    ),
+                    onChanged: (value) => setState(() => workHours = value),
+                  ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
+                Center(
+                  child: Text(
+                    '$workHours시간',
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 33),
                 _buildSummaryLine('직업', occupation),
               ],
             ),
           ),
         ),
-        
-        // 3. 스크롤 영역 밖에 버튼을 두어 하단에 고정
-        const SizedBox(height: 16), // 콘텐츠와 버튼 사이 간격
+        const SizedBox(height: 16),
         Center(
           child: _buildButton('확인', _nextPage),
         ),
@@ -270,7 +278,7 @@ Widget _buildQ3() {
                     );
                   }),
                 ),
-                const SizedBox(height: 32), // 간격 조정
+                const SizedBox(height: 182), // 간격 조정
                 _buildSummaryLine('작업가능시간', '약 $workHours시간'),
                 _buildSummaryLine('직업', occupation),
               ],
@@ -369,7 +377,7 @@ Widget _buildQ4() {
                       },
                     ),
                   ),
-                const SizedBox(height: 32), // 간격 조정
+                const SizedBox(height: 157), // 간격 조정
                 _buildSummaryLine('작업가능요일', _selectedDaysText()),
                 _buildSummaryLine('작업가능시간', '약 $workHours 시간'),
                 _buildSummaryLine('직업', occupation),
@@ -416,33 +424,36 @@ return Padding(
         // 스크롤 영역
         Expanded(
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            child: Stack(
+              children: [ 
                 _buildBackArrow(),
-                Center(
-                  child: Image.asset('assets/images/laptop.png', height: 100),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Image.asset('assets/illustrations/onboarding/laptop.png', height: 70, fit: BoxFit.fill),
+                    ),
+                    const SizedBox(height: 10),
+                    const Center(
+                      child: Text(
+                        '관심사 및 진행 중인 과업,\n앞으로 해야할 것들을 적어주세요.',
+                        style: TextStyle(fontSize: 22, color: Colors.black54),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // 상세 UI를 별도 함수로 분리하여 호출
+                    _buildProjectInput(),
+                    const SizedBox(height: 10),
+                    _buildSummaryLine('가용 예산', finalBudget),
+                    _buildSummaryLine('작업가능요일', _selectedDaysText()),
+                    _buildSummaryLine('작업가능시간', '약 $workHours 시간'),
+                    _buildSummaryLine('직업', occupation),
+                  ],      
                 ),
-                const SizedBox(height: 16),
-                const Center(
-                  child: Text(
-                    '관심사 및 진행 중인 과업,\n앞으로 해야할 것들을 적어주세요.',
-                    style: TextStyle(fontSize: 22, color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                // 상세 UI를 별도 함수로 분리하여 호출
-                _buildProjectInput(),
-                _buildSummaryLine('가용 예산', finalBudget),
-                _buildSummaryLine('작업가능요일', _selectedDaysText()),
-                _buildSummaryLine('작업가능시간', '약 $workHours 시간'),
-                _buildSummaryLine('직업', occupation),
               ],
-              
             ),
           ),
-          
         ),
 
         // 하단 고정 버튼
@@ -488,7 +499,7 @@ Widget _buildQ6() {
                 _buildBackArrow(),
                 const SizedBox(height: 8),
                 Center(
-                  child: Image.asset('assets/images/teapot.png', height: 120),
+                  child: Image.asset('assets/illustrations/onboarding/summary_watch.png', height: 120),
                 ),
                 const SizedBox(height: 32), // 간격 조정
                 _buildSummaryLine('가용 예산', finalBudget),
@@ -557,9 +568,44 @@ Widget _buildQ6() {
 
 // _buildProjectInput이 컨트롤러를 직접 사용하도록 수정
 Widget _buildProjectInput() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
+
+  /*
+  return Stack(
+    clipBehavior: Clip.none, // Stack 밖으로 나가는 + 버튼을 보이게 함
     children: [
+      // 1. 테두리가 있는 메인 카드
+      Container(
+        padding: const EdgeInsets.only(left: 16.0, right: 16.0, top:0 , bottom: 0),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 기간 표시 영역
+            Row(
+              children: [
+                Text(
+                  (startDate == null || endDate == null)
+                      ? '기간 없음'
+                      : '${startDate!.toString().split(' ')[0]} ~ ${endDate!.toString().split(' ')[0]}',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: Icon(Icons.calendar_today, color: Colors.grey[600]),
+                  onPressed: () {
+                    // TODO: Date Range Picker 구현
+                  },
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+
+/*
       const Text('제목', style: TextStyle(fontSize: 16)),
       TextField(
         controller: _projectTitleController, // 컨트롤러 연결
@@ -582,11 +628,116 @@ Widget _buildProjectInput() {
           border: OutlineInputBorder(),
           counterText: '',
         ),
+
         onChanged: (v) => setState(() {}), // 버튼 상태 갱신
+        
+      ),
+      */
+    ],
+  );
+*/
+
+
+  return Stack(
+    clipBehavior: Clip.none, // Stack 밖으로 나가는 + 버튼을 보이게 함
+    children: [
+      // 1. 테두리가 있는 메인 카드
+      Container(
+        padding: const EdgeInsets.only(left: 20, right: 20, top:5, bottom: 0),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade400),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 기간 표시 영역
+            Row(
+              children: [
+                const Text('기간', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(width: 10),
+                Text(
+                  (startDate == null || endDate == null)
+                      ? '기간 없음'
+                      : '${startDate!.toString().split(' ')[0]} ~ ${endDate!.toString().split(' ')[0]}',
+                  style: TextStyle(fontSize: 20, color: Colors.grey[600]),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: Icon(Icons.calendar_today, color: Colors.grey[600]),
+                  iconSize: 25,
+                  onPressed: () {
+                    // TODO: Date Range Picker 구현
+                  },
+                )
+              ],
+            ),
+            // 제목 입력 필드
+            TextField(
+              controller: _projectTitleController,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              decoration: const InputDecoration(
+                hintText: '제목',
+                border: InputBorder.none, // 기본 밑줄 제거
+                contentPadding: EdgeInsets.symmetric(vertical: 0.0), 
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const Divider(height: 0), // 제목과 세부 내용 사이의 선
+            // 세부 내용 입력 필드
+            TextField(
+              controller: _projectDetailController,
+              maxLines: 6, // 여러 줄 입력 가능
+              maxLength: 1000,
+              style: const TextStyle(fontSize: 18),
+              decoration: const InputDecoration(
+                hintText: '세부 내용',
+                border: InputBorder.none, // 기본 테두리 제거
+              ),
+              // 글자 수 카운터 UI 커스텀
+              buildCounter: (context, {required currentLength, required isFocused, maxLength}) {
+                return Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    '$currentLength/$maxLength자',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                );
+              },
+              onChanged: (_) => setState(() {}),
+            ),
+          ],
+        ),
+      ),
+      // 2. 우측 하단의 '+' 버튼
+      Positioned(
+        right: 0,
+        bottom: -60,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[700],
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: const Offset(1, 1),
+              ),
+            ],
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.add, color: Colors.white),
+            onPressed: () {
+              // TODO: 새 과업 카드 추가 로직
+            },
+          ),
+        ),
       ),
     ],
   );
 }
+
 
 
   // --- 페이지 이동 ---
