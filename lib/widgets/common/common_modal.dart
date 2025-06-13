@@ -45,9 +45,13 @@ class CommonModal extends StatelessWidget {
             ),
           ),
           // 본문(커스텀 위젯)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: child,
+          Flexible(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                child: child,
+              ),
+            ),
           ),
         ],
       ),
